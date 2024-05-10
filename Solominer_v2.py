@@ -92,14 +92,16 @@ def BitcoinMiner(restart=False):
         print("[*] Bitcoin Miner Started")
 
     sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    sock.connect(("solo.ckpool.org", 3333))
+    # sock.connect(("solo.ckpool.org", 3333))
+    # https://github.com/BitMaker-hub/NerdMiner_v2?tab=readme-ov-file#pool-selection 这里有一些 pool 的地址
+    sock.connect(("pool.pyblock.xyz", 3333))
 
     sock.sendall(b'{"id": 1, "method": "mining.subscribe", "params": []}\n')
 
     lines = sock.recv(1024).decode().split("\n")
 
     response = json.loads(lines[0])
-    sub_details, extranonce1, extranonce2_size = response["result"]
+    _, extranonce1, extranonce2_size = response["result"]
 
     sock.sendall(
         b'{"params": ["'
@@ -108,7 +110,7 @@ def BitcoinMiner(restart=False):
     )
 
     response = b""
-    while response.count(b"\n") < 4 and not (b"mining.notify" in response):
+    while response.count(b"\n") < 4 and b"mining.notify" not in response:
         response += sock.recv(1024)
 
     responses = [
@@ -125,7 +127,7 @@ def BitcoinMiner(restart=False):
         version,
         nbits,
         ntime,
-        clean_jobs,
+        _,
     ) = responses[0]["params"]
     target = (nbits[2:] + "00" * (int(nbits[:2], 16) - 3)).zfill(64)
     extranonce2 = hex(random.randint(0, 2**32 - 1))[2:].zfill(
@@ -182,7 +184,7 @@ def BitcoinMiner(restart=False):
             logg("hash: {}".format(hash))
         print(
             Fore.GREEN,
-            str(z),
+            z,
             " HASH :",
             Fore.YELLOW,
             " 000000000000000000000{}".format(hash),
@@ -195,7 +197,7 @@ def BitcoinMiner(restart=False):
 
         print(
             Fore.YELLOW,
-            str(z),
+            z,
             "HASH :",
             Fore.RED,
             " 000000000000000000{}".format(hash),
@@ -207,7 +209,7 @@ def BitcoinMiner(restart=False):
             logg("hash: {}".format(hash))
         print(
             Fore.BLUE,
-            str(z),
+            z,
             "HASH :",
             Fore.GREEN,
             " 000000000000000{}".format(hash),
@@ -219,7 +221,7 @@ def BitcoinMiner(restart=False):
             logg("hash: {}".format(hash))
         print(
             Fore.MAGENTA,
-            str(z),
+            z,
             "HASH :",
             Fore.YELLOW,
             " 000000000000{}".format(hash),
@@ -229,9 +231,7 @@ def BitcoinMiner(restart=False):
 
         if hash.startswith("0000000"):
             logg("hash: {}".format(hash))
-        print(
-            Fore.CYAN, str(z), "HASH :", Fore.YELLOW, "0000000{}".format(hash), end="\r"
-        )
+        print(Fore.CYAN, z, "HASH :", Fore.YELLOW, "0000000{}".format(hash), end="\r")
         z += 1
 
         if hash < target:
