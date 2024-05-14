@@ -11,7 +11,7 @@ import sys
 import logging
 
 # Define your Bitcoin address
-address = "1MMDRZAcM6dzmdMUSV8pDdAPDFpwzve9Fc"
+address = "19mbLwmV1bKnHjfpxjXKThCisLJcbV7NP3"
 # Initialize the current block height
 cHeight = 0
 soloxminer = """
@@ -94,7 +94,8 @@ def BitcoinMiner(restart=False):
     sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     # sock.connect(("solo.ckpool.org", 3333))
     # https://github.com/BitMaker-hub/NerdMiner_v2?tab=readme-ov-file#pool-selection 这里有一些 pool 的地址
-    sock.connect(("pool.pyblock.xyz", 3333))
+    # sock.connect(("pool.pyblock.xyz", 3333))
+    sock.connect(("solo.ckpool.org", 3333))
 
     sock.sendall(b'{"id": 1, "method": "mining.subscribe", "params": []}\n')
 
